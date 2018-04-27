@@ -1,9 +1,10 @@
 #include "Adafruit_Simple_AHRS.h"
 
 // Create a simple AHRS from an explicit accelerometer and magnetometer sensor.
-Adafruit_Simple_AHRS::Adafruit_Simple_AHRS(Adafruit_Sensor* accelerometer, Adafruit_Sensor* magnetometer):
+Adafruit_Simple_AHRS::Adafruit_Simple_AHRS(Adafruit_Sensor* accelerometer, Adafruit_Sensor* magnetometer, Adafruit_Sensor *gyroscope):
   _accel(accelerometer),
-  _mag(magnetometer)
+  _mag(magnetometer),
+  _gyro(gyroscope)
 {}
 
 // Create a simple AHRS from a device with multiple sensors.
@@ -67,6 +68,54 @@ bool Adafruit_Simple_AHRS::getOrientation(sensors_vec_t* orientation) {
   orientation->roll = orientation->roll * 180 / PI_F;
   orientation->pitch = orientation->pitch * 180 / PI_F;
   orientation->heading = orientation->heading * 180 / PI_F;
+
+  return true;
+}
+
+// Compute orientation based on accelerometer and gyro data.
+bool Adafruit_Simple_AHRS::getQuad(quad_data_t* orientation) {
+  // Validate input and available sensors.
+  if (orientation == NULL || _accel == NULL || _gyro == NULL) return false;
+
+  // Grab an acceleromter and magnetometer reading.
+  sensors_event_t accel_event;
+  _accel->getEvent(&accel_event);
+  sensors_event_t gyro_event;
+  _gyro->getEvent(&gyro_event);
+
+  float const PI_F = 3.14159265F;
+
+  // roll: Rotation around the X-axis. -180 <= roll <= 180                                          
+  // a positive roll angle is defined to be a clockwise rotation about the positive X-axis          
+  //                                                                                                
+  //                    y                                                                           
+  //      roll = atan2(---)                                                                         
+  //                    z                                                                           
+  //                                                                                                
+  // where:  y, z are returned value from accelerometer sensor                                      
+  orientation->roll = (float)atan2(accel_event.acceleration.y, accel_event.acceleration.z);
+
+  // pitch: Rotation around the Y-axis. -180 <= roll <= 180                                         
+  // a positive pitch angle is defined to be a clockwise rotation about the positive Y-axis         
+  //                                                                                                
+  //                                 -x                                                             
+  //      pitch = atan(-------------------------------)                                             
+  //                    y * sin(roll) + z * cos(roll)                                               
+  //                                                                                                
+  // where:  x, y, z are returned value from accelerometer sensor                                   
+  if (accel_event.acceleration.y * sin(orientation->roll) + accel_event.acceleration.z * cos(orientation->roll) == 0)
+    orientation->pitch = accel_event.acceleration.x > 0 ? (PI_F / 2) : (-PI_F / 2);
+  else
+    orientation->pitch = (float)atan(-accel_event.acceleration.x / (accel_event.acceleration.y * sin(orientation->roll) + \
+                                                                     accel_event.acceleration.z * cos(orientation->roll)));
+
+  // Convert angular data to degree 
+  orientation->roll = orientation->roll * 180 / PI_F;
+  orientation->pitch = orientation->pitch * 180 / PI_F;
+
+  orientation->roll_rate = gyro_event.gyro.x;
+  orientation->pitch_rate = gyro_event.gyro.y;
+  orientation->yaw_rate = gyro_event.gyro.z;
 
   return true;
 }
