@@ -1,4 +1,4 @@
-y#include <Wire.h>
+#include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM9DS1.h>
 #include <Adafruit_Simple_AHRS.h>
@@ -11,13 +11,13 @@ Adafruit_Simple_AHRS ahrs(&lsm.getAccel(), &lsm.getMag(), &lsm.getGyro());
 void setupSensor()
 {
   // Set data rate for G and XL.  Set G low-pass cut off.  (Section 7.12)
-  lsm.write8(XGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG1_G,  ODR_238 | G_BW_G_10 );  //238hz ODR + 63Hz cuttof
+  lsm.write8(XGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG1_G,  ODR_952 | G_BW_G_10 );  //952hz ODR + 63Hz cuttof
 
   // Enable the XL (Section 7.23)
   lsm.write8(XGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG5_XL, XL_ENABLE_X | XL_ENABLE_Y | XL_ENABLE_Z);
 
   // Set low-pass XL filter frequency divider (Section 7.25)
-  lsm.write8(XGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG7_XL, HR_MODE | XL_LP_ODR_RATIO_400);
+  lsm.write8(XGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG7_XL, HR_MODE | XL_LP_ODR_RATIO_9);
   
   // enable mag continuous (Section 8.7)
   lsm.write8(MAGTYPE, Adafruit_LSM9DS1::LSM9DS1_REGISTER_CTRL_REG3_M, B00000000); // continuous mode
@@ -42,18 +42,22 @@ void setup(void)
   }
   
   // Setup the sensor gain and integration time.
-  configureLSM9DS1();
+  setupSensor();
 }
 
+unsigned int last = millis();
 void loop(void) 
 {
   quad_data_t orientation;
 
+  now = millis();
+  
   // Use the simple AHRS function to get the current orientation.
   if (ahrs.getQuadOrientation(&orientation))
   {
     /* 'orientation' should have valid .roll and .pitch fields */
-    Serial.print(F("Orientation: "));
+    Serial.print(now - last);
+    Serial.print(F(" "));
     Serial.print(orientation.roll);
     Serial.print(F(" "));
     Serial.print(orientation.pitch);
@@ -65,6 +69,6 @@ void loop(void)
     Serial.print(orientation.yaw_rate);
     Serial.println(F(""));
   }
-  
-  delay(100);
+
+  last = now;
 }

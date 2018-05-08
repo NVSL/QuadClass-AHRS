@@ -21,7 +21,7 @@ public:
   Adafruit_Simple_AHRS(Adafruit_Sensor* accelerometer, Adafruit_Sensor* magnetometer, Adafruit_Sensor * gyroscope);
   Adafruit_Simple_AHRS(Adafruit_Sensor_Set& sensors);
   bool getOrientation(sensors_vec_t* orientation);
-  bool getQuad(quad_data_t* orientation);
+  bool getQuadOrientation(quad_data_t* orientation);
 
 private:
   Adafruit_Sensor* _accel;

@@ -73,7 +73,7 @@ bool Adafruit_Simple_AHRS::getOrientation(sensors_vec_t* orientation) {
 }
 
 // Compute orientation based on accelerometer.  Return pitch, roll, and gyro numbers.
-bool Adafruit_Simple_AHRS::getQuad(quad_data_t* orientation) {
+bool Adafruit_Simple_AHRS::getQuadOrientation(quad_data_t* orientation) {
   // Validate input and available sensors.
   if (orientation == NULL || _accel == NULL || _gyro == NULL) return false;
 
