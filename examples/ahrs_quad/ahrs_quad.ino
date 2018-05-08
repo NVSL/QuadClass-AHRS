@@ -50,7 +50,7 @@ void loop(void)
 {
   quad_data_t orientation;
 
-  now = millis();
+  int now = millis();
   
   // Use the simple AHRS function to get the current orientation.
   if (ahrs.getQuadOrientation(&orientation))
