@@ -12,7 +12,7 @@
 Adafruit_Simple_AHRS::Adafruit_Simple_AHRS(Adafruit_Sensor *accelerometer,
                                            Adafruit_Sensor *magnetometer,
 					   Adafruit_Sensor *gyroscope)
-	: _accel(accelerometer), _mag(magnetometer), _gyro(*gyroscope){}
+	: _accel(accelerometer), _mag(magnetometer), _gyro(gyroscope){}
 
 /**************************************************************************/
 /*!
@@ -22,7 +22,7 @@ Adafruit_Simple_AHRS::Adafruit_Simple_AHRS(Adafruit_Sensor *accelerometer,
 Adafruit_Simple_AHRS::Adafruit_Simple_AHRS(Adafruit_Sensor_Set &sensors)
     : _accel(sensors.getSensor(SENSOR_TYPE_ACCELEROMETER)),
       _mag(sensors.getSensor(SENSOR_TYPE_MAGNETIC_FIELD)),
-      _gyro(sensors.getSensor(SENSOR_TYPE_ANGULAR_ACCELERATION)){}
+      _gyro(sensors.getSensor(SENSOR_TYPE_GYROSCOPE)){}
 
 /**************************************************************************/
 /*!
