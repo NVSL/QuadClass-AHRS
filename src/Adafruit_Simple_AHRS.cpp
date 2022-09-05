@@ -103,15 +103,24 @@ bool Adafruit_Simple_AHRS::getOrientation(sensors_vec_t *orientation) {
 }
 
 // Compute orientation based on accelerometer.  Return pitch, roll, and gyro numbers.
-bool Adafruit_Simple_AHRS::getQuadOrientation(quad_data_t* orientation) {
+bool Adafruit_Simple_AHRS::getQuadOrientation(quad_data_t* orientation, int orientation_adjustment) {
   // Validate input and available sensors.
-  if (orientation == NULL || _accel == NULL || _gyro == NULL) return false;
 
+  if (orientation == NULL || _accel == NULL || _gyro == NULL) return false;
   // Grab an acceleromter and magnetometer reading.
   sensors_event_t accel_event;
   _accel->getEvent(&accel_event);
   sensors_event_t gyro_event;
   _gyro->getEvent(&gyro_event);
+
+  if (orientation_adjustment & AHRS_FLIP_X)
+    accel_event.acceleration.x = -accel_event.acceleration.x;
+
+  if (orientation_adjustment & AHRS_FLIP_Y)
+    accel_event.acceleration.y = -accel_event.acceleration.y;
+
+  if (orientation_adjustment & AHRS_FLIP_Z)
+    accel_event.acceleration.z = -accel_event.acceleration.z;
 
   float const PI_F = 3.14159265F;
 
@@ -140,8 +149,8 @@ bool Adafruit_Simple_AHRS::getQuadOrientation(quad_data_t* orientation) {
                                                                      accel_event.acceleration.z * cos(orientation->roll)));
 
   // Convert angular data to degree
-  orientation->roll = orientation->roll * 180 / PI_F;
-  orientation->pitch = orientation->pitch * 180 / PI_F;
+  orientation->roll = orientation->roll * 180.0 / PI_F;
+  orientation->pitch = orientation->pitch * 180.0 / PI_F;
 
   orientation->roll_rate = gyro_event.gyro.x;
   orientation->pitch_rate = gyro_event.gyro.y;

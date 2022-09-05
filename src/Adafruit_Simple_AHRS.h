@@ -16,6 +16,9 @@ typedef struct {
      float yaw_rate;
 } quad_data_t;
 
+#define AHRS_FLIP_X B00000001
+#define AHRS_FLIP_Y B00000010
+#define AHRS_FLIP_Z B00000100
 
 /*!
  * @brief Simple sensor fusion AHRS using an accelerometer and magnetometer.
@@ -53,7 +56,7 @@ public:
   /**************************************************************************/
   bool getOrientation(sensors_vec_t *orientation);
 
-  bool getQuadOrientation(quad_data_t* orientation);
+  bool getQuadOrientation(quad_data_t* orientation, int orientation_adjustment = 0);
 
 private:
   Adafruit_Sensor *_accel;
